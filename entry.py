@@ -15,9 +15,7 @@ class App:
                 }
                 workout = templates_dict[selected]
                 for x in range(0,6):
-                    new_lab=self.ex_labs[x]
-                    new_lab['text']=workout[x]
-
+                    self.ex_labs[x]['text']=workout[x]
                 frame.update()
 
         #date label
@@ -28,7 +26,6 @@ class App:
         self.date_input = Entry(frame,textvariable=self.date)
         self.date_input.grid(row=0,column=1,columnspan=6,sticky='w')
         #workout option
-
         self.options = ("A","B")
         self.workout_select = StringVar()
         self.workout_select.set("Workout")
@@ -76,24 +73,81 @@ class App:
                 rep_entry.grid(row=3+rown,column=cols[coln-1]+1,columnspan=1)
                 rep_entry.config(width=5)
                 col_entries.append({"set"+str(coln):(wt_in,rep_in)})
+
             self.wtxrps_entries.append({lift:col_entries})
 
+        # Add exercise
+        self.qrow = 10
+        self.added_entries = []
+        def addrow():
+            print("Add row")
+            new_ex_entry = Entry(frame)
+            new_ex_entry.grid(row=self.qrow,column=0)
+
+            new_cols = []
+            for coln in range(1,6):
+                wt_in = DoubleVar()
+                wt_entry = Entry(frame,textvariable=wt_in)
+                wt_entry.grid(row=self.qrow,column=cols[coln-1],columnspan=1)
+                wt_entry.config(width=5)
+                rep_in = DoubleVar()
+                rep_entry = Entry(frame,textvariable=rep_in)
+                rep_entry.grid(row=self.qrow,column=cols[coln-1]+1,columnspan=1)
+                rep_entry.config(width=5)
+                new_cols.append({"set"+str(coln):(wt_in,rep_in)})
+
+            self.added_entries.append({new_ex_entry:new_cols})
 
 
-        self.sys_msg = StringVar()
-        self.msg_box = Label(frame,text=self.sys_msg.get())
-        self.msg_box.grid(row=10,column=1,columnspan=9)
 
+            self.qrow = self.qrow + 1
+
+            self.addrow_btn.grid_forget()
+            self.msg_box.grid_forget()
+            self.enter_btn.grid_forget()
+            self.quit_btn.grid_forget()
+
+            create_footer()
+
+
+
+        def create_footer():
+            self.addrow_btn = Button(frame,text="Add Exercise",command=addrow)
+            self.addrow_btn.grid(row=self.qrow, column=0, columnspan=1)
+
+
+            #System message placeholder
+            self.sys_msg = StringVar()
+            self.msg_box = Label(frame,text=self.sys_msg.get())
+            self.msg_box.grid(row=self.qrow+1,column=1,columnspan=9)
+
+            ####SUBMIT
+            self.enter_btn = Button(frame, text="Submit", fg="blue", command=submit_entries)
+            self.enter_btn.grid(row=self.qrow + 1, column=0, columnspan=1, sticky='w')
+
+            ####QUIT BUTTON
+            self.quit_btn = Button(frame, text="QUIT", fg="red", command=frame.quit)
+            self.quit_btn.grid(row=self.qrow + 1, column=10, columnspan=4)
+
+        #Submit entries to JSON
         def submit_entries():
             if not self.ex_labs[0]['text']:
                 self.msg_box['text']='ERROR: you must select a workout!'
             else:
                 try:
+                    for row in self.added_entries:
+                        self.wtxrps_entries.append(row)
+
                     data = {}
                     excs = {}
                     for row in self.wtxrps_entries:
-                        for label,sets in row.items():
-                            lift = label['text']
+                        print(row)
+                        for lift,sets in row.items():
+                            if not lift['text']:
+                                lift = lift.get()
+                            else:
+                                lift = lift['text']
+                            print(lift)
                             sets_get = {}
                             for set in sets:
                                 for setnum, vals in set.items():
@@ -106,15 +160,8 @@ class App:
                     self.msg_box['text'] =("Unexpected error:",sys.exc_info()[0],sys.exc_info()[1])
                     raise
 
-        self.enter_btn = Button(frame,text="Submit",fg="blue",command=submit_entries)
-        self.enter_btn.grid(row=10,column=0,columnspan=1,sticky='w')
-
-
-
-        #QUIT BUTTON
-        self.quit_btn = Button(frame, text="QUIT", fg="red", command=frame.quit)
-        self.quit_btn.grid(row=10, column=10, columnspan=4)
-
+        #initialize footer
+        create_footer()
 
 ################################
 '''#######  RUN APP  ########'''
