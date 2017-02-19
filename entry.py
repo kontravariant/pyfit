@@ -21,10 +21,30 @@ class App:
         #date label
         self.date_label = Label(frame, text="Enter date: ")
         self.date_label.grid(row=0,column=0,sticky='e')
+
+        #date dropdowns
+        self.month_var = StringVar()
+        self.month_var.set("MM")
+        self.day_var = StringVar()
+        self.day_var.set("DD")
+        self.year_var = StringVar()
+        self.year_var.set("YY")
+        month_list = [str(x) for x in range(1,13)]
+        day_list = [str(x) for x in range(1,32)]
+        year_list = [str(x) for x in range(0,100)]
+        self.month_drop = OptionMenu(frame, self.month_var, *month_list)
+        self.month_drop.grid(row=0,column=1)
+        self.day_drop = OptionMenu(frame, self.day_var, *day_list)
+        self.day_drop.grid(row=0,column=2)
+        self.year_drop = OptionMenu(frame, self.year_var, *year_list)
+        self.year_drop.grid(row=0,column=3)
+
         #date input
+        '''
         self.date = StringVar()
         self.date_input = Entry(frame,textvariable=self.date)
         self.date_input.grid(row=0,column=1,columnspan=6,sticky='w')
+        '''
         #workout option
         self.options = ("A","B")
         self.workout_select = StringVar()
@@ -135,25 +155,27 @@ class App:
                 self.msg_box['text']='ERROR: you must select a workout!'
             else:
                 try:
+                    #add any additional exercises to entry list
                     for row in self.added_entries:
                         self.wtxrps_entries.append(row)
 
                     data = {}
                     excs = {}
                     for row in self.wtxrps_entries:
-                        print(row)
+
                         for lift,sets in row.items():
                             if not lift['text']:
                                 lift = lift.get()
                             else:
                                 lift = lift['text']
-                            print(lift)
+
                             sets_get = {}
                             for set in sets:
                                 for setnum, vals in set.items():
                                     sets_get[setnum]=(vals[0].get(),vals[1].get())
                             excs[lift]=sets_get
-                    data[self.date.get()]=excs
+                    date_in = "{0}/{1}/{2}".format(self.month_var.get(),self.day_var.get(),self.year_var.get())
+                    data[date_in]=excs
                     with open("{}.json".format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')), 'w') as data_file:
                         json.dump(data, data_file, indent=4)
                 except:
