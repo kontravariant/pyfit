@@ -2,7 +2,7 @@ from tkinter import *
 import json
 import datetime
 
-class App:
+class EntryApp:
     def __init__(self, master):
         frame = Frame(master)
         frame.grid()
@@ -19,7 +19,7 @@ class App:
                 frame.update()
 
         #date label
-        self.date_label = Label(frame, text="Enter date: ")
+        self.date_label = Label(frame, text="Enter mm/dd/yy: ")
         self.date_label.grid(row=0,column=0,sticky='e')
 
         #date dropdowns
@@ -33,18 +33,13 @@ class App:
         day_list = [str(x) for x in range(1,32)]
         year_list = [str(x) for x in range(0,100)]
         self.month_drop = OptionMenu(frame, self.month_var, *month_list)
-        self.month_drop.grid(row=0,column=1)
+        self.month_drop.grid(row=0,column=1,columnspan=2,sticky='w')
         self.day_drop = OptionMenu(frame, self.day_var, *day_list)
-        self.day_drop.grid(row=0,column=2)
+        self.day_drop.grid(row=0,column=3,columnspan=2,sticky='w')
         self.year_drop = OptionMenu(frame, self.year_var, *year_list)
-        self.year_drop.grid(row=0,column=3)
+        self.year_drop.grid(row=0,column=5,columnspan=2,sticky='w')
 
-        #date input
-        '''
-        self.date = StringVar()
-        self.date_input = Entry(frame,textvariable=self.date)
-        self.date_input.grid(row=0,column=1,columnspan=6,sticky='w')
-        '''
+
         #workout option
         self.options = ("A","B")
         self.workout_select = StringVar()
@@ -176,7 +171,7 @@ class App:
                             excs[lift]=sets_get
                     date_in = "{0}/{1}/{2}".format(self.month_var.get(),self.day_var.get(),self.year_var.get())
                     data[date_in]=excs
-                    with open("{}.json".format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')), 'w') as data_file:
+                    with open("data/{}.json".format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')), 'w') as data_file:
                         json.dump(data, data_file, indent=4)
                 except:
                     self.msg_box['text'] =("Unexpected error:",sys.exc_info()[0],sys.exc_info()[1])
@@ -189,6 +184,7 @@ class App:
 '''#######  RUN APP  ########'''
 ################################
 root = Tk()
-app = App(root)
+root.wm_title("Weightlifting Entry")
+app = EntryApp(root)
 root.mainloop()
 root.destroy()
